@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Тригонометрические уравнения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #2b3a67 0%, #1b2a4e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-style: italic;
+        }
+
+        .level-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .level-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+            letter-spacing: 0.5px;
+        }
+
+        .level-btn.active {
+            background: #ffd966;
+            color: #1b2a4e;
+            transform: scale(1.08);
+            border-color: #ffd966;
+            box-shadow: 0 10px 25px rgba(255, 217, 102, 0.4);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 60px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255,255,255,0.15);
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #ffd966;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .trainer-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 40px;
+            padding: 35px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .equation-display {
+            background: #f8f9ff;
+            border-radius: 30px;
+            padding: 35px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 3px solid #e0e7ff;
+        }
+
+        .equation {
+            font-size: 3.5em;
+            font-weight: 800;
+            color: #1b2a4e;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .equation-type {
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 40px;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .type-basic {
+            background: #fbbf24;
+            color: #78350f;
+        }
+
+        .type-medium {
+            background: #60a5fa;
+            color: #1e3a8a;
+        }
+
+        .type-hard {
+            background: #f87171;
+            color: #7f1d1d;
+        }
+
+        .options-section {
+            margin-bottom: 25px;
+        }
+
+        .options-label {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #1b2a4e;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #e0e7ff;
+            border-radius: 20px;
+            padding: 20px 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1b2a4e;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-btn:hover {
+            background: #e0e7ff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+        }
+
+        .option-btn.selected {
+            background: #ffd966;
+            border-color: #ffd966;
+            color: #1b2a4e;
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(255, 217, 102, 0.3);
+        }
+
+        .option-btn.correct-highlight {
+            background: #9ae6b4;
+            border-color: #48bb78;
+            color: #22543d;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 18px 25px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .btn-check {
+            background: linear-gradient(145deg, #ffd966, #fbbf24);
+            color: #1b2a4e;
+        }
+
+        .btn-solution {
+            background: linear-gradient(145deg, #9ae6b4, #68d391);
+            color: #22543d;
+        }
+
+        .btn-next {
+            background: linear-gradient(145deg, #90cdf4, #63b3ed);
+            color: #1e3a8a;
+        }
+
+        .btn-reset {
+            background: linear-gradient(145deg, #feb2b2, #fc8181);
+            color: #742a2a;
+        }
+
+        .result {
+            padding: 25px;
+            border-radius: 25px;
+            margin-top: 25px;
+            animation: slideIn 0.4s;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-correct {
+            background: #c6f6d5;
+            border: 4px solid #48bb78;
+            color: #22543d;
+        }
+
+        .result-incorrect {
+            background: #fed7d7;
+            border: 4px solid #f56565;
+            color: #742a2a;
+        }
+
+        .result-info {
+            background: #e9ecef;
+            border: 4px solid #a0aec0;
+            color: #2d3748;
+        }
+
+        .result-warning {
+            background: #feebc8;
+            border: 4px solid #ed8936;
+            color: #7b341e;
+        }
+
+        .reference {
+            background: rgba(255,255,255,0.95);
+            border-radius: 40px;
+            padding: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .reference h2 {
+            color: #1b2a4e;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 4px solid #ffd966;
+            padding-bottom: 10px;
+        }
+
+        .unit-circle {
+            text-align: center;
+            margin-bottom: 25px;
+            background: #f8f9ff;
+            border-radius: 30px;
+            padding: 20px;
+            border: 3px solid #e0e7ff;
+        }
+
+        .circle-svg {
+            width: 100%;
+            max-width: 350px;
+            height: auto;
+        }
+
+        .angle-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            padding: 6px 15px;
+            border-radius: 30px;
+            border: 2px solid #e0e7ff;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .formula-card {
+            background: #f8f9ff;
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e7ff;
+        }
+
+        .formula {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #1b2a4e;
+            margin-bottom: 8px;
+        }
+
+        .special-cases {
+            background: #f8f9ff;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #e0e7ff;
+        }
+
+        .special-case {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 2px dashed #cbd5e0;
+            font-weight: 500;
+        }
+
+        .special-case:last-child {
+            border-bottom: none;
+        }
+
+        .table-values {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .table-values th {
+            background: #1b2a4e;
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+        }
+
+        .table-values td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .table-values tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+
+        @media (max-width: 1000px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .equation {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Тригонометрический тренажёр</h1>
+            <p>Простейшие тригонометрические уравнения</p>
+        </div>
+
+        <div class="level-indicator">
+            <button class="level-btn active" onclick="setLevel('basic')" id="btn-basic">Базовый уровень</button>
+            <button class="level-btn" onclick="setLevel('medium')" id="btn-medium">Средний уровень</button>
+            <button class="level-btn" onclick="setLevel('hard')" id="btn-hard">Сложный уровень</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="correct-count">0</div>
+                <div class="stat-label">Правильно</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-count">0</div>
+                <div class="stat-label">Всего</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="success-rate">0%</div>
+                <div class="stat-label">Успешность</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="trainer-card">
+                <div class="equation-display">
+                    <div class="equation" id="equation">sin x = 1/2</div>
+                    <span class="equation-type" id="equation-type">Базовый</span>
+                </div>
+
+                <div class="options-section">
+                    <span class="options-label">Выберите правильный ответ:</span>
+                    <div class="options-grid" id="options-container">
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-check" onclick="checkAnswer()">Проверить</button>
+                    <button class="btn btn-solution" onclick="showSolution()">Решение</button>
+                    <button class="btn btn-next" onclick="nextEquation()">Далее</button>
+                    <button class="btn btn-reset" onclick="resetStats()">Сброс</button>
+                </div>
+
+                <div class="result" id="result" style="display: none;"></div>
+            </div>
+
+            <div class="reference">
+                <h2>Справочный материал</h2>
+                
+                <div class="unit-circle">
+                    <svg viewBox="0 0 200 200" class="circle-svg">
+                        <!-- Окружность -->
+                        <circle cx="100" cy="100" r="80" fill="none" stroke="#1b2a4e" stroke-width="3"/>
+                        
+                        <!-- Оси координат -->
+                        <line x1="20" y1="100" x2="180" y2="100" stroke="#a0aec0" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="100" y1="20" x2="100" y2="180" stroke="#a0aec0" stroke-width="2" stroke-dasharray="5,5"/>
+                        
+                        <!-- Основные углы (0°, 90°, 180°, 270°) -->
+                        <circle cx="180" cy="100" r="6" fill="#ffd966" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="190" y="103" font-size="9" font-weight="bold" fill="#1b2a4e">0°</text>
+                        
+                        <circle cx="100" cy="20" r="6" fill="#ffd966" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="95" y="10" font-size="9" font-weight="bold" fill="#1b2a4e">90°</text>
+                        
+                        <circle cx="20" cy="100" r="6" fill="#ffd966" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="-2" y="103" font-size="9" font-weight="bold" fill="#1b2a4e">180°</text>
+                        
+                        <circle cx="100" cy="180" r="6" fill="#ffd966" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="92" y="195" font-size="9" font-weight="bold" fill="#1b2a4e">270°</text>
+                        
+                        <!-- Углы 30°, 45°, 60° в первой четверти -->
+                        <circle cx="175" cy="70" r="5" fill="#60a5fa" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="172" y="62" font-size="8" font-weight="bold" fill="#1b2a4e">30°</text>
+                        
+                        <circle cx="157" cy="44" r="5" fill="#60a5fa" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="150" y="36" font-size="8" font-weight="bold" fill="#1b2a4e">45°</text>
+                        
+                        <circle cx="130" cy="25" r="5" fill="#60a5fa" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="130" y="18" font-size="8" font-weight="bold" fill="#1b2a4e">60°</text>
+                        
+                        <!-- Углы во второй четверти -->
+                        <circle cx="41" cy="44" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="25" y="37" font-size="8" font-weight="bold" fill="#1b2a4e">135°</text>
+
+                        <circle cx="70" cy="25" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="55" y="18" font-size="8" font-weight="bold" fill="#1b2a4e">120°</text>
+                        
+                        <circle cx="25" cy="70" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="13" y="60" font-size="8" font-weight="bold" fill="#1b2a4e">150°</text>
+                        
+                        <!-- Углы в третьей четверти -->
+                        <circle cx="26" cy="130" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="2" y="135" font-size="8" font-weight="bold" fill="#1b2a4e">210°</text>
+                        
+                        <circle cx="43" cy="157" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="20" y="160" font-size="8" font-weight="bold" fill="#1b2a4e">225°</text>
+
+                        <circle cx="70" cy="175" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="47" y="180" font-size="8" font-weight="bold" fill="#1b2a4e">240°</text>
+                        
+                        <!-- Углы в четвёртой четверти -->
+                        <circle cx="157" cy="157" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="150" y="170" font-size="8" font-weight="bold" fill="#1b2a4e">315°</text>
+                        
+                        <circle cx="175" cy="130" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="175" y="143" font-size="8" font-weight="bold" fill="#1b2a4e">330°</text>
+
+                        <circle cx="130" cy="175" r="5" fill="#fbbf24" stroke="#1b2a4e" stroke-width="2"/>
+                        <text x="122" y="188" font-size="8" font-weight="bold" fill="#1b2a4e">300°</text>
+                        
+                        <!-- Подписи осей -->
+                        <text x="160" y="110" font-size="7" fill="#4a5568">cos</text>
+                        <text x="105" y="40" font-size="7" fill="#4a5568">sin</text>
+                    </svg>
+                    
+                    <div class="angle-legend">
+                        <div class="legend-item">
+                            <div class="color-dot" style="background: #ffd966;"></div>
+                            <span>0°, 90°, 180°, 270°</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-dot" style="background: #60a5fa;"></div>
+                            <span>30°, 45°, 60°</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="color-dot" style="background: #fbbf24;"></div>
+                            <span>120°, 135°, 150°, 210°, 225°, 240°, 300°, 315°, 330°</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-card">
+                    <div class="formula">sin x = a</div>
+                    <div>x = (-1)ⁿ arcsin a + πn, n ∈ Z</div>
+                    <div><small>|a| ≤ 1</small></div>
+                </div>
+
+                <div class="formula-card">
+                    <div class="formula">cos x = a</div>
+                    <div>x = ± arccos a + 2πn, n ∈ Z</div>
+                    <div><small>|a| ≤ 1</small></div>
+                </div>
+
+                <div class="formula-card">
+                    <div class="formula">tg x = a</div>
+                    <div>x = arctg a + πn, n ∈ Z</div>
+                    <div><small>a ∈ R</small></div>
+                </div>
+
+                <div class="special-cases">
+                    <h3 style="margin-bottom: 10px;">Частные случаи</h3>
+                    <div class="special-case">
+                        <span>sin x = 0</span>
+                        <span>x = πn</span>
+                    </div>
+                    <div class="special-case">
+                        <span>sin x = 1</span>
+                        <span>x = π/2 + 2πn</span>
+                    </div>
+                    <div class="special-case">
+                        <span>sin x = -1</span>
+                        <span>x = -π/2 + 2πn</span>
+                    </div>
+                    <div class="special-case">
+                        <span>cos x = 0</span>
+                        <span>x = π/2 + πn</span>
+                    </div>
+                    <div class="special-case">
+                        <span>cos x = 1</span>
+                        <span>x = 2πn</span>
+                    </div>
+                    <div class="special-case">
+                        <span>cos x = -1</span>
+                        <span>x = π + 2πn</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const basicEquations = [
+            // sin уравнения
+            { text: "sin x = 0", 
+              options: ["x = π/2 + πn, n ∈ Z", "x = πn, n ∈ Z", "x = 2πn, n ∈ Z", "x = π + 2πn, n ∈ Z"],
+              correct: 1,
+              solution: "sin x = 0 → x = πn, n ∈ Z" },
+            { text: "sin x = 1", 
+              options: ["x = πn, n ∈ Z", "x = π/2 + πn, n ∈ Z", "x = π/2 + 2πn, n ∈ Z", "x = 2πn, n ∈ Z"],
+              correct: 2,
+              solution: "sin x = 1 → x = π/2 + 2πn, n ∈ Z" },
+            { text: "sin x = -1", 
+              options: ["x = -π/2 + 2πn, n ∈ Z", "x = πn, n ∈ Z", "x = 3π/2 + 2πn, n ∈ Z", "x = π + 2πn, n ∈ Z"],
+              correct: 0,
+              solution: "sin x = -1 → x = -π/2 + 2πn, n ∈ Z" },
+            { text: "sin x = 1/2", 
+              options: ["x = π/6 + 2πn", "x = ±π/6 + 2πn", "x = π/6 + 2πn, 5π/6 + 2πn", "x = π/6 + πn"],
+              correct: 2,
+              solution: "sin x = 1/2 → x = π/6 + 2πn и x = 5π/6 + 2πn, n ∈ Z" },
+            { text: "sin x = √2/2", 
+              options: ["x = π/4 + 2πn, 3π/4 + 2πn", "x = ±π/4 + 2πn", "x = π/4 + 2πn", "x = π/4 + πn"],
+              correct: 0,
+              solution: "sin x = √2/2 → x = π/4 + 2πn и x = 3π/4 + 2πn, n ∈ Z" },
+            { text: "sin x = √3/2", 
+              options: ["x = π/3 + 2πn", "x = ±π/3 + 2πn", "x = π/3 + πn", "x = π/3 + 2πn, 2π/3 + 2πn"],
+              correct: 3,
+              solution: "sin x = √3/2 → x = π/3 + 2πn и x = 2π/3 + 2πn, n ∈ Z" },
+            
+            // cos уравнения
+            { text: "cos x = 0", 
+              options: ["x = π/2 + πn, n ∈ Z", "x = πn, n ∈ Z", "x = π/2 + 2πn, n ∈ Z", "x = 2πn, n ∈ Z"],
+              correct: 0,
+              solution: "cos x = 0 → x = π/2 + πn, n ∈ Z" },
+            { text: "cos x = 1", 
+              options: ["x = πn, n ∈ Z", "x = π/2 + 2πn, n ∈ Z", "x = 2πn, n ∈ Z", "x = π + 2πn, n ∈ Z"],
+              correct: 2,
+              solution: "cos x = 1 → x = 2πn, n ∈ Z" },
+            { text: "cos x = -1", 
+              options: ["x = π + 2πn, n ∈ Z", "x = π/2 + πn, n ∈ Z", "x = 2πn, n ∈ Z", "x = πn, n ∈ Z"],
+              correct: 0,
+              solution: "cos x = -1 → x = π + 2πn, n ∈ Z" },
+            { text: "cos x = 1/2", 
+              options: ["x = π/3 + 2πn", "x = ±π/3 + 2πn", "x = π/3 + πn", "x = π/6 + 2πn"],
+              correct: 1,
+              solution: "cos x = 1/2 → x = ±π/3 + 2πn, n ∈ Z" },
+            { text: "cos x = √2/2", 
+              options: ["x = ±π/4 + 2πn", "x = π/4 + 2πn", "x = π/4 + πn", "x = π/3 + 2πn"],
+              correct: 0,
+              solution: "cos x = √2/2 → x = ±π/4 + 2πn, n ∈ Z" },
+            { text: "cos x = √3/2", 
+              options: ["x = π/6 + πn", "x = π/6 + 2πn", "x = ±π/6 + 2πn", "x = π/3 + 2πn"],
+              correct: 2,
+              solution: "cos x = √3/2 → x = ±π/6 + 2πn, n ∈ Z" },
+            
+            // tg уравнения
+            { text: "tg x = 0", 
+              options: ["x = π/2 + πn, n ∈ Z", "x = πn, n ∈ Z", "x = 2πn, n ∈ Z", "x = π/2 + 2πn, n ∈ Z"],
+              correct: 1,
+              solution: "tg x = 0 → x = πn, n ∈ Z" },
+            { text: "tg x = 1", 
+              options: ["x = π/4 + πn", "x = π/4 + 2πn", "x = π/4 + 2πn, 5π/4 + 2πn", "x = ±π/4 + 2πn"],
+              correct: 0,
+              solution: "tg x = 1 → x = π/4 + πn, n ∈ Z" },
+            { text: "tg x = √3", 
+              options: ["x = π/3 + 2πn", "x = π/6 + πn", "x = π/3 + πn", "x = π/4 + πn"],
+              correct: 2,
+              solution: "tg x = √3 → x = π/3 + πn, n ∈ Z" },
+            { text: "tg x = 1/√3", 
+              options: ["x = π/6 + πn", "x = π/6 + 2πn", "x = π/4 + πn", "x = π/3 + πn"],
+              correct: 0,
+              solution: "tg x = 1/√3 → x = π/6 + πn, n ∈ Z" }
+        ];
+
+        // Средний уровень (с отрицательными значениями)
+        const mediumEquations = [
+            { text: "sin x = -1/2", 
+              options: ["x = -π/6 + πn", "x = π/6 + 2πn, 5π/6 + 2πn", "x = -π/6 + 2πn, -5π/6 + 2πn", "x = ±π/6 + 2πn"],
+              correct: 2,
+              solution: "sin x = -1/2 → x = -π/6 + 2πn и x = -5π/6 + 2πn, n ∈ Z" },
+            { text: "sin x = -√2/2", 
+              options: ["x = -π/4 + 2πn, -3π/4 + 2πn", "x = π/4 + 2πn, 3π/4 + 2πn", "x = ±π/4 + 2πn", "x = -π/4 + πn"],
+              correct: 0,
+              solution: "sin x = -√2/2 → x = -π/4 + 2πn и x = -3π/4 + 2πn, n ∈ Z" },
+            { text: "sin x = -√3/2", 
+              options: ["x = ±π/3 + 2πn", "x = -π/3 + 2πn, -2π/3 + 2πn", "x = π/3 + 2πn, 2π/3 + 2πn", "x = -π/3 + πn"],
+              correct: 1,
+              solution: "sin x = -√3/2 → x = -π/3 + 2πn и x = -2π/3 + 2πn, n ∈ Z" },
+            
+            { text: "cos x = -1/2", 
+              options: ["x = ±2π/3 + 2πn", "x = ±π/3 + 2πn", "x = 2π/3 + 2πn", "x = π/3 + 2πn"],
+              correct: 0,
+              solution: "cos x = -1/2 → x = ±2π/3 + 2πn, n ∈ Z" },
+            { text: "cos x = -√2/2", 
+              options: ["x = ±π/4 + 2πn", "x = ±3π/4 + 2πn", "x = 3π/4 + 2πn", "x = π/4 + 2πn"],
+              correct: 1,
+              solution: "cos x = -√2/2 → x = ±3π/4 + 2πn, n ∈ Z" },
+            { text: "cos x = -√3/2", 
+              options: ["x = ±5π/6 + 2πn", "x = ±π/6 + 2πn", "x = 5π/6 + 2πn", "x = π/6 + 2πn"],
+              correct: 0,
+              solution: "cos x = -√3/2 → x = ±5π/6 + 2πn, n ∈ Z" },
+            
+            { text: "tg x = -1", 
+              options: ["x = π/4 + πn", "x = -π/4 + 2πn", "x = -π/4 + πn", "x = 3π/4 + 2πn"],
+              correct: 2,
+              solution: "tg x = -1 → x = -π/4 + πn, n ∈ Z" },
+            { text: "tg x = -√3", 
+              options: ["x = -π/3 + πn", "x = π/3 + πn", "x = -π/3 + 2πn", "x = 2π/3 + 2πn"],
+              correct: 0,
+              solution: "tg x = -√3 → x = -π/3 + πn, n ∈ Z" }
+        ];
+
+        // Сложный уровень (с преобразованиями и отбором корней)
+        const hardEquations = [
+            { text: "2 cos x + 1 = 0", 
+              options: ["x = ±π/3 + 2πn", "x = ±2π/3 + 2πn", "x = 2π/3 + 2πn", "x = π/3 + 2πn"],
+              correct: 1,
+              solution: "2 cos x + 1 = 0 → cos x = -1/2 → x = ±2π/3 + 2πn, n ∈ Z" },
+            { text: "2 sin x - √2 = 0", 
+              options: ["x = π/4 + 2πn, 3π/4 + 2πn", "x = π/4 + 2πn", "x = π/4 + πn", "x = ±π/4 + 2πn"],
+              correct: 0,
+              solution: "2 sin x = √2 → sin x = √2/2 → x = π/4 + 2πn и x = 3π/4 + 2πn, n ∈ Z" },
+            { text: "sin x = 1/2, x ∈ [0; π]", 
+              options: ["π/6", "π/6, π/3", "π/6, 5π/6", "π/6, 2π/3"],
+              correct: 2,
+              solution: "sin x = 1/2 → x = π/6 и x = 5π/6 (оба входят в [0; π])" },
+            { text: "cos x = -√2/2, x ∈ [0; 2π]", 
+              options: ["3π/4, 5π/4", "π/4, 3π/4", "3π/4, 7π/4", "π/4, 7π/4"],
+              correct: 0,
+              solution: "cos x = -√2/2 → x = 3π/4 и x = 5π/4 (в промежутке [0; 2π])" },
+            { text: "tg x = 1, x ∈ [0; 2π]", 
+              options: ["π/4", "π/4, 5π/4", "π/4, 3π/4", "π/4, π"],
+              correct: 1,
+              solution: "tg x = 1 → x = π/4 и x = 5π/4 (в промежутке [0; 2π])" },
+            { text: "sin x = -1/2, наибольший отрицательный корень", 
+              options: ["-5π/6", "-π/6", "-π/3", "-π/2"],
+              correct: 1,
+              solution: "sin x = -1/2 → x = -π/6 + 2πn и x = -5π/6 + 2πn. Наибольший отрицательный: -π/6" },
+            { text: "cos x = 1/2, наименьший положительный корень", 
+              options: ["π/3", "-π/3", "π/6", "5π/3"],
+              correct: 0,
+              solution: "cos x = 1/2 → x = ±π/3 + 2πn. Наименьший положительный: π/3" },
+            { text: "(x - π/2) cos x = 0", 
+              options: ["x = π/2 + 2πn", "x = π/2", "x = π/2 + πn, π/2", "x = π/2 + πn"],
+              correct: 3,
+              solution: "Произведение равно 0 → x - π/2 = 0 или cos x = 0 → x = π/2 или x = π/2 + πn. Объединяем: x = π/2 + πn, n ∈ Z" },
+            { text: "sin x cos x = 0", 
+              options: ["x = πn/2", "x = πn", "x = π/2 + πn", "x = 2πn"],
+              correct: 0,
+              solution: "sin x cos x = 0 → sin x = 0 или cos x = 0 → x = πn или x = π/2 + πn → x = πn/2, n ∈ Z" }
+        ];
+
+        // Объединяем все уравнения
+        const allEquations = {
+            basic: basicEquations,
+            medium: mediumEquations,
+            hard: hardEquations
+        };
+
+        let currentLevel = 'basic';
+        let currentEquation = null;
+        let correctCount = 0;
+        let totalCount = 0;
+        let selectedOption = null;
+
+        window.onload = function() {
+            nextEquation();
+            updateStats();
+        };
+
+        function setLevel(level) {
+            currentLevel = level;
+            
+            document.getElementById('btn-basic').classList.remove('active');
+            document.getElementById('btn-medium').classList.remove('active');
+            document.getElementById('btn-hard').classList.remove('active');
+            document.getElementById(`btn-${level}`).classList.add('active');
+            
+            nextEquation();
+        }
+
+        function nextEquation() {
+            const equations = allEquations[currentLevel];
+            const randomIndex = Math.floor(Math.random() * equations.length);
+            currentEquation = equations[randomIndex];
+            
+            document.getElementById('equation').textContent = currentEquation.text;
+            
+            const typeElement = document.getElementById('equation-type');
+            const levelNames = {
+                basic: 'Базовый',
+                medium: 'Средний',
+                hard: 'Сложный'
+            };
+            typeElement.textContent = levelNames[currentLevel];
+            
+            const typeClasses = {
+                basic: 'type-basic',
+                medium: 'type-medium',
+                hard: 'type-hard'
+            };
+            typeElement.className = 'equation-type ' + (currentLevel === 'basic' ? 'type-basic' : currentLevel === 'medium' ? 'type-medium' : 'type-hard');
+            
+            // Отображаем варианты ответов
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            currentEquation.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => selectOption(index);
+                optionsContainer.appendChild(btn);
+            });
+            
+            selectedOption = null;
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function selectOption(index) {
+            // Снимаем выделение со всех кнопок
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Выделяем выбранную
+            document.querySelectorAll('.option-btn')[index].classList.add('selected');
+            selectedOption = index;
+        }
+
+        function checkAnswer() {
+            if (!currentEquation) return;
+            
+            if (selectedOption === null) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result result-warning';
+                resultDiv.innerHTML = '<strong>Выберите ответ!</strong> Пожалуйста, выберите один из вариантов.';
+                return;
+            }
+
+            const isCorrect = (selectedOption === currentEquation.correct);
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            
+            if (isCorrect) {
+                resultDiv.className = 'result result-correct';
+                resultDiv.innerHTML = '<strong>Правильно!</strong> Отличная работа!';
+                correctCount++;
+                totalCount++;
+            } else {
+                // При ошибке показываем дополнительный материал
+                const correctAnswer = currentEquation.options[currentEquation.correct];
+                resultDiv.className = 'result result-incorrect';
+                resultDiv.innerHTML = `
+                    <strong>Неправильно.</strong><br><br>
+                    <strong>Подсказка:</strong><br>
+                    Правильный ответ: ${correctAnswer}<br>
+                    ${getHint(currentEquation)}
+                `;
+                totalCount++;
+            }
+            
+            updateStats();
+        }
+
+        function getHint(equation) {
+            const text = equation.text;
+            
+            if (text.includes('sin')) {
+                return 'Вспомните единичную окружность: синус — это координата y.';
+            } else if (text.includes('cos')) {
+                return 'Вспомните единичную окружность: косинус — это координата x.';
+            } else if (text.includes('tg')) {
+                return 'Тангенс — это отношение sin/cos.';
+            } else {
+                return 'Проверьте частные случаи в справочном материале.';
+            }
+        }
+
+        function showSolution() {
+            if (!currentEquation) return;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result result-info';
+            resultDiv.innerHTML = '<strong>Решение:</strong><br>' + currentEquation.solution;
+        }
+
+        function updateStats() {
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('total-count').textContent = totalCount;
+            
+            const rate = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+            document.getElementById('success-rate').textContent = rate + '%';
+        }
+
+        function resetStats() {
+            correctCount = 0;
+            totalCount = 0;
+            updateStats();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result result-info';
+            resultDiv.innerHTML = 'Статистика сброшена. Начните заново!';
+            
+            nextEquation();
+        }
+    </script>
+</body>
+</html>
