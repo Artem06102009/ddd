@@ -65,7 +65,6 @@
         .level-btn:hover {
             transform: translateY(-3px);
             background: rgba(255,255,255,0.3);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
         .level-btn:active {
@@ -186,8 +185,7 @@
 
         .option-btn:hover {
             background: #e0e7ff;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
 
         .option-btn:active {
@@ -198,7 +196,18 @@
             background: #ffd966;
             border-color: #ffd966;
             transform: scale(1.02);
-            box-shadow: 0 5px 15px rgba(255, 217, 102, 0.4);
+        }
+
+        .option-btn.correct-highlight {
+            background: #9ae6b4;
+            border-color: #48bb78;
+            color: #22543d;
+        }
+
+        .option-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            pointer-events: none;
         }
 
         .buttons {
@@ -221,12 +230,18 @@
         }
 
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
         .btn:active {
             transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-check { background: linear-gradient(145deg, #ffd966, #fbbf24); color: #1b2a4e; }
@@ -244,7 +259,7 @@
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-15px); }
+            from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -348,9 +363,9 @@
                     <div class="options-grid" id="options-container"></div>
                 </div>
                 <div class="buttons">
-                    <button class="btn btn-check" onclick="checkAnswer()">Проверить</button>
-                    <button class="btn btn-solution" onclick="showSolution()">Решение</button>
-                    <button class="btn btn-next" onclick="nextEquation()">Далее</button>
+                    <button class="btn btn-check" onclick="checkAnswer()" id="checkBtn">Проверить</button>
+                    <button class="btn btn-solution" onclick="showSolution()" id="solutionBtn">Решение</button>
+                    <button class="btn btn-next" onclick="nextEquation()" id="nextBtn">Далее</button>
                     <button class="btn btn-reset" onclick="resetStats()">Сброс</button>
                 </div>
                 <div class="result" id="result" style="display: none;"></div>
@@ -359,12 +374,13 @@
             <div class="reference">
                 <h2>Справочный материал</h2>
                 <div class="circle-image">
-                    <img src="okr.webp" alt="Тригонометрическая окружность" class="circle-img">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Unit_circle_angles.svg/1024px-Unit_circle_angles.svg.png" alt="Тригонометрическая окружность" class="circle-img">
                     <p style="font-size: 0.8em; margin-top: 10px; color: #4a5568;">Единичная окружность с основными углами</p>
                 </div>
                 <div class="formula-card"><div class="formula">sin x = a</div><div>x = (-1)ⁿ arcsin a + πn, n ∈ Z</div><small>|a| ≤ 1</small></div>
                 <div class="formula-card"><div class="formula">cos x = a</div><div>x = ± arccos a + 2πn, n ∈ Z</div><small>|a| ≤ 1</small></div>
                 <div class="formula-card"><div class="formula">tg x = a</div><div>x = arctg a + πn, n ∈ Z</div><small>a ∈ R</small></div>
+                <div class="formula-card"><div class="formula">ctg x = a</div><div>x = arcctg a + πn, n ∈ Z</div><small>a ∈ R</small></div>
                 <div class="special-cases">
                     <h3 style="margin-bottom:8px; font-size:1em;">Частные случаи</h3>
                     <div class="special-case"><span>sin x = 0</span><span>x = πn</span></div>
@@ -373,13 +389,14 @@
                     <div class="special-case"><span>cos x = 0</span><span>x = π/2 + πn</span></div>
                     <div class="special-case"><span>cos x = 1</span><span>x = 2πn</span></div>
                     <div class="special-case"><span>cos x = -1</span><span>x = π + 2πn</span></div>
+                    <div class="special-case"><span>tg x = 0</span><span>x = πn</span></div>
+                    <div class="special-case"><span>ctg x = 0</span><span>x = π/2 + πn</span></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Базовые уравнения (с ответами, правильные ответы НЕ всегда на первой позиции)
         function shuffleOptions(eq) {
             const indices = [0, 1, 2, 3];
             for (let i = indices.length - 1; i > 0; i--) {
@@ -391,53 +408,53 @@
             return { ...eq, options: newOptions, correct: newCorrect };
         }
 
+        // ==================== УРОВЕНЬ 1: ПРОСТЕЙШИЕ (20 задач) ====================
         const rawLevel1 = [
             { text: "sin x = 0", options: ["x = π/2 + πn", "x = πn", "x = 2πn", "x = π + 2πn"], correct: 1, solution: "sin x = 0 → x = πn, n ∈ Z" },
             { text: "sin x = 1", options: ["x = πn", "x = π/2 + πn", "x = π/2 + 2πn", "x = 2πn"], correct: 2, solution: "sin x = 1 → x = π/2 + 2πn, n ∈ Z" },
-            { text: "sin x = 1/2", options: ["x = π/6 + 2πn", "x = ±π/6 + 2πn", "x = π/6 + 2πn, 5π/6 + 2πn", "x = π/6 + πn"], correct: 2, solution: "sin x = 1/2 → x = π/6 + 2πn и x = 5π/6 + 2πn" },
+            { text: "sin x = 1/2", options: ["x = π/6 + 2πn", "x = ±π/6 + 2πn", "x = π/6 + 2πn, 5π/6 + 2πn", "x = π/6 + πn"], correct: 2, solution: "sin x = 1/2 → x = π/6 + 2πn и x = 5π/6 + 2πn, n ∈ Z" },
             { text: "sin x = -1", options: ["x = -π/2 + 2πn", "x = πn", "x = 3π/2 + 2πn", "x = π + 2πn"], correct: 0, solution: "sin x = -1 → x = -π/2 + 2πn, n ∈ Z" },
-            { text: "sin x = √2/2", options: ["x = π/4 + 2πn, 3π/4 + 2πn", "x = ±π/4 + 2πn", "x = π/4 + 2πn", "x = π/4 + πn"], correct: 0, solution: "sin x = √2/2 → x = π/4 + 2πn и x = 3π/4 + 2πn" },
-            { text: "sin x = √3/2", options: ["x = π/3 + 2πn", "x = ±π/3 + 2πn", "x = π/3 + πn", "x = π/3 + 2πn, 2π/3 + 2πn"], correct: 3, solution: "sin x = √3/2 → x = π/3 + 2πn и x = 2π/3 + 2πn" },
+            { text: "sin x = √2/2", options: ["x = π/4 + 2πn, 3π/4 + 2πn", "x = ±π/4 + 2πn", "x = π/4 + 2πn", "x = π/4 + πn"], correct: 0, solution: "sin x = √2/2 → x = π/4 + 2πn и x = 3π/4 + 2πn, n ∈ Z" },
+            { text: "sin x = √3/2", options: ["x = π/3 + 2πn", "x = ±π/3 + 2πn", "x = π/3 + πn", "x = π/3 + 2πn, 2π/3 + 2πn"], correct: 3, solution: "sin x = √3/2 → x = π/3 + 2πn и x = 2π/3 + 2πn, n ∈ Z" },
             { text: "cos x = 0", options: ["x = π/2 + πn", "x = πn", "x = π/2 + 2πn", "x = 2πn"], correct: 0, solution: "cos x = 0 → x = π/2 + πn, n ∈ Z" },
             { text: "cos x = 1", options: ["x = πn", "x = π/2 + 2πn", "x = 2πn", "x = π + 2πn"], correct: 2, solution: "cos x = 1 → x = 2πn, n ∈ Z" },
             { text: "cos x = -1", options: ["x = π + 2πn", "x = π/2 + πn", "x = 2πn", "x = πn"], correct: 0, solution: "cos x = -1 → x = π + 2πn, n ∈ Z" },
-            { text: "cos x = 1/2", options: ["x = π/3 + 2πn", "x = ±π/3 + 2πn", "x = π/3 + πn", "x = π/6 + 2πn"], correct: 1, solution: "cos x = 1/2 → x = ±π/3 + 2πn" },
-            { text: "cos x = √2/2", options: ["x = ±π/4 + 2πn", "x = π/4 + 2πn", "x = π/4 + πn", "x = π/3 + 2πn"], correct: 0, solution: "cos x = √2/2 → x = ±π/4 + 2πn" },
-            { text: "cos x = √3/2", options: ["x = π/6 + πn", "x = π/6 + 2πn", "x = ±π/6 + 2πn", "x = π/3 + 2πn"], correct: 2, solution: "cos x = √3/2 → x = ±π/6 + 2πn" },
+            { text: "cos x = 1/2", options: ["x = π/3 + 2πn", "x = ±π/3 + 2πn", "x = π/3 + πn", "x = π/6 + 2πn"], correct: 1, solution: "cos x = 1/2 → x = ±π/3 + 2πn, n ∈ Z" },
+            { text: "cos x = √2/2", options: ["x = ±π/4 + 2πn", "x = π/4 + 2πn", "x = π/4 + πn", "x = π/3 + 2πn"], correct: 0, solution: "cos x = √2/2 → x = ±π/4 + 2πn, n ∈ Z" },
+            { text: "cos x = √3/2", options: ["x = π/6 + πn", "x = π/6 + 2πn", "x = ±π/6 + 2πn", "x = π/3 + 2πn"], correct: 2, solution: "cos x = √3/2 → x = ±π/6 + 2πn, n ∈ Z" },
             { text: "tg x = -1", options: ["x = π/4 + πn", "x = -π/4 + 2πn", "x = -π/4 + πn", "x = 3π/4 + 2πn"], correct: 2, solution: "tg x = -1 → x = -π/4 + πn, n ∈ Z" },
             { text: "tg x = -√3", options: ["x = -π/3 + πn", "x = π/3 + πn", "x = -π/3 + 2πn", "x = 2π/3 + 2πn"], correct: 0, solution: "tg x = -√3 → x = -π/3 + πn, n ∈ Z" },
-            { text: "sin x = -1/2", options: ["x = -π/6 + πn", "x = π/6 + 2πn, 5π/6 + 2πn", "x = -π/6 + 2πn, -5π/6 + 2πn", "x = ±π/6 + 2πn"], correct: 2, solution: "sin x = -1/2 → x = -π/6 + 2πn и x = -5π/6 + 2πn" },
-            { text: "sin x = -√2/2", options: ["x = -π/4 + 2πn, -3π/4 + 2πn", "x = π/4 + 2πn, 3π/4 + 2πn", "x = ±π/4 + 2πn", "x = -π/4 + πn"], correct: 0, solution: "sin x = -√2/2 → x = -π/4 + 2πn и x = -3π/4 + 2πn" },
-            { text: "sin x = -√3/2", options: ["x = ±π/3 + 2πn", "x = -π/3 + 2πn, -2π/3 + 2πn", "x = π/3 + 2πn, 2π/3 + 2πn", "x = -π/3 + πn"], correct: 1, solution: "sin x = -√3/2 → x = -π/3 + 2πn и x = -2π/3 + 2πn" },
-            { text: "cos x = -1/2", options: ["x = ±2π/3 + 2πn", "x = ±π/3 + 2πn", "x = 2π/3 + 2πn", "x = π/3 + 2πn"], correct: 0, solution: "cos x = -1/2 → x = ±2π/3 + 2πn" },
-            { text: "cos x = -√2/2", options: ["x = ±π/4 + 2πn", "x = ±3π/4 + 2πn", "x = 3π/4 + 2πn", "x = π/4 + 2πn"], correct: 1, solution: "cos x = -√2/2 → x = ±3π/4 + 2πn" },
-            { text: "cos x = -√3/2", options: ["x = ±5π/6 + 2πn", "x = ±π/6 + 2πn", "x = 5π/6 + 2πn", "x = π/6 + 2πn"], correct: 0, solution: "cos x = -√3/2 → x = ±5π/6 + 2πn" }
+            { text: "sin x = -1/2", options: ["x = -π/6 + πn", "x = π/6 + 2πn, 5π/6 + 2πn", "x = -π/6 + 2πn, -5π/6 + 2πn", "x = ±π/6 + 2πn"], correct: 2, solution: "sin x = -1/2 → x = -π/6 + 2πn и x = -5π/6 + 2πn, n ∈ Z" },
+            { text: "sin x = -√2/2", options: ["x = -π/4 + 2πn, -3π/4 + 2πn", "x = π/4 + 2πn, 3π/4 + 2πn", "x = ±π/4 + 2πn", "x = -π/4 + πn"], correct: 0, solution: "sin x = -√2/2 → x = -π/4 + 2πn и x = -3π/4 + 2πn, n ∈ Z" },
+            { text: "sin x = -√3/2", options: ["x = ±π/3 + 2πn", "x = -π/3 + 2πn, -2π/3 + 2πn", "x = π/3 + 2πn, 2π/3 + 2πn", "x = -π/3 + πn"], correct: 1, solution: "sin x = -√3/2 → x = -π/3 + 2πn и x = -2π/3 + 2πn, n ∈ Z" },
+            { text: "cos x = -1/2", options: ["x = ±2π/3 + 2πn", "x = ±π/3 + 2πn", "x = 2π/3 + 2πn", "x = π/3 + 2πn"], correct: 0, solution: "cos x = -1/2 → x = ±2π/3 + 2πn, n ∈ Z" },
+            { text: "cos x = -√2/2", options: ["x = ±π/4 + 2πn", "x = ±3π/4 + 2πn", "x = 3π/4 + 2πn", "x = π/4 + 2πn"], correct: 1, solution: "cos x = -√2/2 → x = ±3π/4 + 2πn, n ∈ Z" },
+            { text: "cos x = -√3/2", options: ["x = ±5π/6 + 2πn", "x = ±π/6 + 2πn", "x = 5π/6 + 2πn", "x = π/6 + 2πn"], correct: 0, solution: "cos x = -√3/2 → x = ±5π/6 + 2πn, n ∈ Z" }
         ];
 
+        // ==================== УРОВЕНЬ 2: ОТБОР КОРНЕЙ (7 задач) ====================
         const rawLevel2 = [
-            { text: "sin x = 1/2, x ∈ [0; π]", options: ["π/6", "π/6, π/3", "π/6, 5π/6", "π/6, 2π/3"], correct: 2, solution: "sin x = 1/2 → x = π/6 и x = 5π/6 (оба входят в [0; π])" },
-            { text: "sin x = -1/2, x ∈ [π; 2π]", options: ["7π/6, 11π/6", "π/6, 5π/6", "7π/6", "11π/6"], correct: 0, solution: "sin x = -1/2 → x = 7π/6 и x = 11π/6" },
-            { text: "cos x = √2/2, x ∈ [-π; 0]", options: ["-π/4", "-π/4, π/4", "-3π/4", "-π/4, -3π/4"], correct: 0, solution: "cos x = √2/2 → x = -π/4" },
-            { text: "cos x = -1/2, x ∈ [0; 2π]", options: ["2π/3, 4π/3", "π/3, 5π/3", "2π/3", "4π/3"], correct: 0, solution: "cos x = -1/2 → x = 2π/3 и x = 4π/3" },
-            { text: "tg x = 1, x ∈ [0; 2π]", options: ["π/4", "π/4, 5π/4", "π/4, 3π/4", "π/4, π"], correct: 1, solution: "tg x = 1 → x = π/4 и x = 5π/4" },
-            { text: "sin x = -1/2, наибольший отрицательный корень", options: ["-5π/6", "-π/6", "-π/3", "-π/2"], correct: 1, solution: "sin x = -1/2 → x = -π/6 + 2πn и x = -5π/6 + 2πn. Наибольший отрицательный: -π/6" },
-            { text: "cos x = 1/2, наименьший положительный корень", options: ["π/3", "-π/3", "π/6", "5π/3"], correct: 0, solution: "cos x = 1/2 → x = ±π/3 + 2πn. Наименьший положительный: π/3" }
+            { text: "sin x = 1/2, x ∈ [0; π]", options: ["π/6", "π/6, π/3", "π/6, 5π/6", "π/6, 2π/3"], correct: 2, solution: "sin x = 1/2 → x = π/6 + 2πn и x = 5π/6 + 2πn. На промежутке [0; π] попадают π/6 и 5π/6." },
+            { text: "sin x = -1/2, x ∈ [π; 2π]", options: ["7π/6, 11π/6", "π/6, 5π/6", "7π/6", "11π/6"], correct: 0, solution: "sin x = -1/2 → x = -π/6 + 2πn и x = -5π/6 + 2πn. На промежутке [π; 2π] попадают 7π/6 и 11π/6." },
+            { text: "cos x = √2/2, x ∈ [-π; 0]", options: ["-π/4", "-π/4, π/4", "-3π/4", "-π/4, -3π/4"], correct: 0, solution: "cos x = √2/2 → x = ±π/4 + 2πn. На промежутке [-π; 0] попадает -π/4." },
+            { text: "cos x = -1/2, x ∈ [0; 2π]", options: ["2π/3, 4π/3", "π/3, 5π/3", "2π/3", "4π/3"], correct: 0, solution: "cos x = -1/2 → x = ±2π/3 + 2πn. На промежутке [0; 2π] попадают 2π/3 и 4π/3." },
+            { text: "tg x = 1, x ∈ [0; 2π]", options: ["π/4", "π/4, 5π/4", "π/4, 3π/4", "π/4, π"], correct: 1, solution: "tg x = 1 → x = π/4 + πn. На промежутке [0; 2π] попадают π/4 и 5π/4." },
+            { text: "sin x = -1/2, наибольший отрицательный корень", options: ["-5π/6", "-π/6", "-π/3", "-π/2"], correct: 1, solution: "sin x = -1/2 → x = -π/6 + 2πn и x = -5π/6 + 2πn. Наибольший отрицательный: -π/6 (ближе к нулю)." },
+            { text: "cos x = 1/2, наименьший положительный корень", options: ["π/3", "-π/3", "π/6", "5π/3"], correct: 0, solution: "cos x = 1/2 → x = ±π/3 + 2πn. Наименьший положительный: π/3." }
         ];
 
+        // ==================== УРОВЕНЬ 3: ЕГЭ №13 (8 задач) ====================
         const rawLevel3 = [
-            { text: "√2 cos³ x - √2 cos x + sin² x = 0", options: ["x = πn", "x = π/2 + πn", "x = πn/2", "x = πn, π/2 + πn"], correct: 3, solution: "Преобразуем: √2 cos x (cos² x - 1) + sin² x = 0 → -√2 cos x sin² x + sin² x = 0 → sin² x (1 - √2 cos x) = 0 → sin x = 0 или cos x = 1/√2 → x = πn или x = ±π/4 + 2πn" },
-            { text: "sin x (1 + cos x) = cos² x + cos x + 1", options: ["x = π/2 + 2πn", "x = π/2 + πn", "x = πn", "x = πn, π/2 + 2πn"], correct: 3, solution: "Преобразуем: sin x + sin x cos x = cos² x + cos x + 1 → sin x - 1 = cos x (1 - sin x) → (sin x - 1)(1 + cos x) = 0 → sin x = 1 или cos x = -1 → x = π/2 + 2πn или x = π + 2πn" },
-            { text: "1/tg x + 1/ctg x - 2 ctg x = 2", options: ["x = π/4 + πn", "x = -π/4 + πn", "x = π/4 + πn, -π/4 + πn", "x = πn/2"], correct: 2, solution: "Упрощаем: ctg x + tg x - 2 ctg x = 2 → tg x - ctg x = 2 → (sin² x - cos² x)/(sin x cos x) = 2 → -cos 2x = sin 2x → tg 2x = -1 → 2x = -π/4 + πn → x = -π/8 + πn/2" },
-            { text: "24 sin² x + 1 + 24 cos² x = 18", options: ["x = πn", "x = πn/2", "x = π/2 + πn", "нет решений"], correct: 3, solution: "24(sin² x + cos² x) + 1 = 18 → 24·1 + 1 = 18 → 25 = 18 → решений нет" },
-            { text: "√ctg x (sin² x - 1/4) = 0", options: ["x = π/6 + πn, 5π/6 + πn", "x = π/6 + πn", "x = ±π/6 + πn", "x = π/6 + πn, π/2 + πn"], correct: 3, solution: "√ctg x = 0 → ctg x = 0 → x = π/2 + πn или sin² x = 1/4 → sin x = ±1/2 → x = ±π/6 + πn. Объединяя: x = π/6 + πn, π/2 + πn" },
-            { text: "2 cos(x - 3π/2) cos(2π - x) = √3 sin x", options: ["x = π/3 + 2πn, 2π/3 + 2πn", "x = π/3 + πn", "x = π/3 + 2πn", "x = πn, π/3 + 2πn"], correct: 0, solution: "cos(x - 3π/2) = -sin x, cos(2π - x) = cos x → -2 sin x cos x = √3 sin x → sin x (2 cos x + √3) = 0 → sin x = 0 или cos x = -√3/2 → x = πn или x = ±5π/6 + 2πn" },
-            { text: "(3x² - 19x + 20)(2 cos x + √3) = 0", options: ["x = 4, 5/3", "x = 4, 5/3, ±5π/6 + 2πn", "x = ±5π/6 + 2πn", "x = 4, 5/3, ±5π/6 + 2πn, πn"], correct: 3, solution: "3x² - 19x + 20 = 0 → x = 4, x = 5/3 или 2 cos x + √3 = 0 → cos x = -√3/2 → x = ±5π/6 + 2πn" },
-            { text: "√3 sin 2x + 3 cos 2x = 0", options: ["x = -π/6 + πn/2", "x = π/6 + πn/2", "x = π/3 + πn", "x = πn/2"], correct: 0, solution: "Делим на cos 2x: √3 tg 2x + 3 = 0 → tg 2x = -√3 → 2x = -π/3 + πn → x = -π/6 + πn/2" },
-            { text: "sin x + sin 2x = 0", options: ["x = πn, ±2π/3 + 2πn", "x = πn", "x = ±2π/3 + 2πn", "x = πn/2"], correct: 0, solution: "sin x + 2 sin x cos x = 0 → sin x (1 + 2 cos x) = 0 → sin x = 0 или cos x = -1/2 → x = πn или x = ±2π/3 + 2πn" },
-            { text: "cos 2x = sin x", options: ["x = π/6 + 2πn, 5π/6 + 2πn", "x = π/6 + πn, -π/2 + 2πn", "x = πn/2", "x = πn"], correct: 1, solution: "1 - 2 sin² x = sin x → 2 sin² x + sin x - 1 = 0 → sin x = 1/2 или sin x = -1 → x = π/6 + 2πn, 5π/6 + 2πn или x = -π/2 + 2πn" }
+            { text: "√2 cos³ x - √2 cos x + sin² x = 0", options: ["x = πn", "x = ±π/4 + 2πn", "x = πn, ±π/4 + 2πn", "x = πn/2"], correct: 2, solution: "√2 cos x (cos² x - 1) + sin² x = 0 → -√2 cos x sin² x + sin² x = 0 → sin² x (1 - √2 cos x) = 0 → sin x = 0 или cos x = √2/2 → x = πn или x = ±π/4 + 2πn, n ∈ Z." },
+            { text: "sin x (1 + cos x) = cos² x + cos x + 1", options: ["x = π/2 + 2πn", "x = πn", "x = πn, π/2 + 2πn", "x = π/2 + πn"], correct: 0, solution: "sin x + sin x cos x = cos² x + cos x + 1 → (sin x - 1)(2 + sin x + cos x) = 0 → sin x = 1 → x = π/2 + 2πn. Второй множитель решений не даёт, т.к. sin x + cos x ≥ -√2." },
+            { text: "24 sin² x + 1 + 24 cos² x = 18", options: ["x = πn", "x = πn/2", "x = π/2 + πn", "нет решений"], correct: 3, solution: "24(sin² x + cos² x) + 1 = 18 → 24·1 + 1 = 18 → 25 = 18 → противоречие, решений нет." },
+            { text: "√ctg x (sin² x - 1/4) = 0", options: ["x = π/6 + πn, π/2 + πn", "x = π/2 + πn", "x = π/6 + πn", "x = ±π/6 + 2πn"], correct: 0, solution: "ОДЗ: ctg x ≥ 0, sin x ≠ 0. √ctg x = 0 → ctg x = 0 → x = π/2 + πn. sin² x = 1/4 → sin x = ±1/2. С учётом ОДЗ (ctg x ≥ 0) подходят x = π/6 + πn. Ответ: x = π/6 + πn, x = π/2 + πn, n ∈ Z." },
+            { text: "2 cos(x - 3π/2) cos(2π - x) = √3 sin x", options: ["x = πn", "x = ±5π/6 + 2πn", "x = πn, ±5π/6 + 2πn", "x = πn/2"], correct: 2, solution: "cos(x - 3π/2) = -sin x, cos(2π - x) = cos x → -2 sin x cos x = √3 sin x → sin x (2 cos x + √3) = 0 → sin x = 0 или cos x = -√3/2 → x = πn или x = ±5π/6 + 2πn, n ∈ Z." },
+            { text: "√3 sin 2x + 3 cos 2x = 0", options: ["x = -π/6 + πn", "x = -π/6 + πn/2", "x = π/3 + πn", "x = πn/2"], correct: 1, solution: "Делим на cos 2x: √3 tg 2x + 3 = 0 → tg 2x = -√3 → 2x = -π/3 + πn → x = -π/6 + πn/2, n ∈ Z." },
+            { text: "sin x + sin 2x = 0", options: ["x = πn", "x = ±2π/3 + 2πn", "x = πn, ±2π/3 + 2πn", "x = πn/2"], correct: 2, solution: "sin x + 2 sin x cos x = 0 → sin x (1 + 2 cos x) = 0 → sin x = 0 или cos x = -1/2 → x = πn или x = ±2π/3 + 2πn, n ∈ Z." },
+            { text: "cos 2x = sin x", options: ["x = π/6 + 2πn, 5π/6 + 2πn", "x = -π/2 + 2πn", "x = π/6 + 2πn, 5π/6 + 2πn, -π/2 + 2πn", "x = π/6 + πn"], correct: 2, solution: "cos 2x = 1 - 2 sin² x → 1 - 2 sin² x = sin x → 2 sin² x + sin x - 1 = 0 → sin x = 1/2 или sin x = -1 → x = π/6 + 2πn, 5π/6 + 2πn или x = -π/2 + 2πn, n ∈ Z." }
         ];
 
-        // Перемешиваем варианты ответов для всех уравнений
         const level1Equations = rawLevel1.map(eq => shuffleOptions(eq));
         const level2Equations = rawLevel2.map(eq => shuffleOptions(eq));
         const level3Equations = rawLevel3.map(eq => shuffleOptions(eq));
@@ -446,6 +463,8 @@
         let currentLevel = 1;
         let currentEquation = null;
         let correctCount = 0, totalCount = 0, selectedOption = null;
+        let isAnswered = false;
+        let solutionUsed = false;
 
         window.onload = function() { nextEquation(); updateStats(); };
 
@@ -478,18 +497,55 @@
                 btn.onclick = () => selectOption(index);
                 optionsContainer.appendChild(btn);
             });
+            
             selectedOption = null;
+            isAnswered = false;
+            solutionUsed = false;
             document.getElementById('result').style.display = 'none';
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('disabled', 'correct-highlight', 'selected');
+                btn.style.pointerEvents = 'auto';
+            });
+            document.getElementById('checkBtn').disabled = false;
+            document.getElementById('solutionBtn').disabled = false;
         }
 
         function selectOption(index) {
+            if (isAnswered) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result result-warning';
+                resultDiv.innerHTML = '<strong>Вы уже ответили на этот вопрос!</strong> Нажмите "Далее" для следующего задания.';
+                return;
+            }
+            
             document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
             document.querySelectorAll('.option-btn')[index].classList.add('selected');
             selectedOption = index;
         }
 
+        function highlightCorrectAnswer() {
+            document.querySelectorAll('.option-btn').forEach((btn, idx) => {
+                if (idx === currentEquation.correct) {
+                    btn.classList.add('correct-highlight');
+                }
+                btn.classList.add('disabled');
+                btn.style.pointerEvents = 'none';
+            });
+        }
+
         function checkAnswer() {
             if (!currentEquation) return;
+            
+            if (isAnswered) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result result-warning';
+                resultDiv.innerHTML = '<strong>Вы уже ответили на этот вопрос!</strong> Нажмите "Далее" для следующего задания.';
+                return;
+            }
+            
             if (selectedOption === null) {
                 const resultDiv = document.getElementById('result');
                 resultDiv.style.display = 'block';
@@ -497,19 +553,41 @@
                 resultDiv.innerHTML = '<strong>Выберите ответ!</strong>';
                 return;
             }
+            
+            if (solutionUsed) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result result-warning';
+                resultDiv.innerHTML = '<strong>Вы использовали кнопку "Решение"!</strong> Ответ не засчитан. Попробуйте следующее задание.';
+                isAnswered = true;
+                highlightCorrectAnswer();
+                document.getElementById('checkBtn').disabled = true;
+                return;
+            }
+
             const isCorrect = (selectedOption === currentEquation.correct);
             const resultDiv = document.getElementById('result');
             resultDiv.style.display = 'block';
+            
             if (isCorrect) {
                 resultDiv.className = 'result result-correct';
                 resultDiv.innerHTML = '<strong>Правильно!</strong> Отличная работа!';
                 correctCount++;
                 totalCount++;
+                isAnswered = true;
+                highlightCorrectAnswer();
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('solutionBtn').disabled = true;
             } else {
                 const correctAnswer = currentEquation.options[currentEquation.correct];
                 resultDiv.className = 'result result-incorrect';
                 resultDiv.innerHTML = `<strong>Неправильно.</strong><br><br>Правильный ответ: ${correctAnswer}<br><br>${getHint(currentEquation)}`;
                 totalCount++;
+                isAnswered = true;
+                highlightCorrectAnswer();
+                document.getElementById('checkBtn').disabled = true;
+                // Кнопка "Решение" остаётся активной
+                document.getElementById('solutionBtn').disabled = false;
             }
             updateStats();
         }
@@ -518,15 +596,40 @@
             if (equation.text.includes('sin')) return 'Подсказка: вспомните единичную окружность, синус — это координата y.';
             if (equation.text.includes('cos')) return 'Подсказка: вспомните единичную окружность, косинус — это координата x.';
             if (equation.text.includes('tg')) return 'Подсказка: тангенс — это отношение синуса к косинусу.';
+            if (equation.text.includes('ctg')) return 'Подсказка: котангенс — это отношение косинуса к синусу.';
             return 'Подсказка: проверьте частные случаи в справочном материале.';
         }
 
         function showSolution() {
             if (!currentEquation) return;
+            
+            if (isAnswered && !solutionUsed) {
+                // Уже отвечено (правильно или неправильно), но решение ещё не показывали
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result result-info';
+                resultDiv.innerHTML = '<strong>Решение:</strong><br>' + currentEquation.solution;
+                return;
+            }
+            
+            if (isAnswered && solutionUsed) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result result-warning';
+                resultDiv.innerHTML = '<strong>Вы уже посмотрели решение!</strong> Нажмите "Далее" для следующего задания.';
+                return;
+            }
+            
+            // Первый показ решения
+            solutionUsed = true;
             const resultDiv = document.getElementById('result');
             resultDiv.style.display = 'block';
             resultDiv.className = 'result result-info';
-            resultDiv.innerHTML = '<strong>Решение:</strong><br>' + currentEquation.solution;
+            resultDiv.innerHTML = '<strong>Решение:</strong><br>' + currentEquation.solution + '<br><br><span style="color:#e53e3e;">⚠️ Ответ не засчитан, так как вы посмотрели решение.</span>';
+            
+            highlightCorrectAnswer();
+            document.getElementById('checkBtn').disabled = true;
+            isAnswered = true;
         }
 
         function updateStats() {
